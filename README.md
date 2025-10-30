@@ -17,6 +17,8 @@ This is achieved through a two-stage process:
 1.  **A high-fidelity autoencoder** learns to compress K tokens into a single vector and reconstruct them with near-perfect accuracy.
 2.  **A continuous-domain language model** then performs autoregressive prediction in this vector space.
 
+An in-depth explaination of CALM is available [here](https://shaochenze.github.io/blog/2025/CALM).
+
 ### Key Features
 
 *   🚀 **Ultra-Efficient by Design:** Dramatically improves training and inference efficiency by reducing the number of autoregressive steps by a factor of K. 
@@ -28,8 +30,6 @@ This is achieved through a two-stage process:
     *   **Energy-Based Training**, a principled and likelihood-free method for generative modeling.
     *   **BrierLM**, a new metric for calibrated, likelihood-free evaluation of language models.
     *   **Temperature Sampling** for controlled, high-quality text generation using only a black-box sampler.
-
-An in-depth explaination of CALM is available [here](https://shaochenze.github.io/blog/2025/CALM).
 
 ## Getting Started
 
