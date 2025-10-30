@@ -29,6 +29,8 @@ This is achieved through a two-stage process:
     *   **BrierLM**, a new metric for calibrated, likelihood-free evaluation of language models.
     *   **Temperature Sampling** for controlled, high-quality text generation using only a black-box sampler.
 
+An in-depth explaination of CALM is available [here](https://shaochenze.github.io/blog/2025/CALM).
+
 ## Getting Started
 
 1.  Clone the Repository
