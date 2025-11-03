@@ -1,5 +1,5 @@
 # CALM: Continuous Autoregressive Language Models
-[![arXiv](https://img.shields.io/badge/arXiv-2511.-b31b1b.svg?logo=arXiv)]()
+[![arXiv](https://img.shields.io/badge/arXiv-2510.27688-b31b1b.svg?logo=arXiv)](https://arxiv.org/abs/2510.27688)
 [![code](https://img.shields.io/badge/Github-Code-keygen.svg?logo=github)](https://github.com/shaochenze/calm)
 [![model](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging_Face-Model-blue.svg)](https://huggingface.co/collections/cccczshao/calm)
 [![Blog Post](https://img.shields.io/badge/Blog%20Post-Read%20Here-blue)](https://shaochenze.github.io/blog/2025/CALM)
