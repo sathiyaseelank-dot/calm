@@ -199,7 +199,6 @@ class EnergyTransformer(CALM):
         n_y = 100
         eps = torch.randn((n_y, *mean.shape), device=mean.device)
         y = mean + eps * std  # (n_y, batch_size, ...)
-        y = y
 
         x_ = x.reshape(n_x, 1, *x.shape[1:])  # (n_x, 1, batch_size, ...)
         y_ = y.reshape(1, n_y, *y.shape[1:])  # (1, n_y, batch_size, ...)
