@@ -67,9 +67,6 @@ class Encoder(LlamaPreTrainedModel):
         input_ids = input_ids.reshape(batch_size * num_patches, self.patch_size)
 
         inputs_embeds = self.embed_tokens(input_ids)
-        if self.training:
-            inputs_embeds = inputs_embeds.to(dtype=torch.bfloat16)
-
         hidden_states = inputs_embeds
 
         for stage in range(2):
@@ -99,6 +96,7 @@ class Decoder(LlamaPreTrainedModel):
         self.decoder_layers = nn.ModuleList([AELayer(config) for _ in range(config.num_decoder_layers)])
         self.expand_layer = nn.Linear(config.hidden_size, self.patch_size * config.hidden_size)
         self.norm = LlamaRMSNorm(config.hidden_size, eps=config.rms_norm_eps)
+        self.lm_head = nn.Linear(config.hidden_size, config.vocab_size, bias=True)
 
         # Initialize weights and apply final processing
         self.post_init()
@@ -123,19 +121,16 @@ class Decoder(LlamaPreTrainedModel):
                 hidden_states = hidden_states.reshape(batch_size, seq_length * self.patch_size, -1)
 
         hidden_states = self.norm(hidden_states)
-        logits = F.linear(hidden_states, self.lm_head_weight)
+        logits = self.lm_head(hidden_states)
         return logits
 
 
 class Autoencoder(LlamaPreTrainedModel):
-    _tied_weights_keys = ["lm_head.weight"]
-
     def __init__(self, config):
         super().__init__(config)
         self.encoder = Encoder(config)
         self.decoder = Decoder(config)
         self.patch_size = config.patch_size
-        self.decoder.lm_head_weight = self.encoder.embed_tokens.weight
         self.ae_dropout = config.ae_dropout
         self.kl_clamp = config.kl_clamp
         self.kl_weight = config.kl_weight
@@ -156,27 +151,35 @@ class Autoencoder(LlamaPreTrainedModel):
         **kwargs
     ) -> Union[Tuple, CausalLMOutputWithPast]:
         input_ids = input_ids.reshape(-1, self.patch_size)
-        if self.training:
+        if self.training and self.ae_dropout > 0:
             mask = torch.rand_like(input_ids.float()) > self.ae_dropout
             input_ids = input_ids * mask.long()
 
         latent_states = self.encoder(input_ids=input_ids)
         mean, log_std = torch.chunk(latent_states, 2, dim=-1)
         std = torch.exp(log_std)
-        eps = torch.randn_like(mean)
-        latent_states = mean + eps * std
-        latent_states = torch.nn.functional.dropout(latent_states, p=self.ae_dropout, training=self.training)
+        if self.training and self.kl_weight > 0:
+            eps = torch.randn_like(mean)
+            latent_states = mean + eps * std
+        else:
+            latent_states = mean
+        if self.training and self.ae_dropout > 0:
+            latent_states = torch.nn.functional.dropout(latent_states, p=self.ae_dropout, training=self.training)
 
-        kl_loss = 0.5 * (torch.pow(mean, 2) + torch.pow(std, 2) - 1 - log_std * 2)
-        kl_loss = torch.clamp(kl_loss, min = self.kl_clamp)
-        kl_loss = torch.mean(torch.sum(kl_loss, dim=-1))
+        kl_loss = 0.0
+        if self.kl_weight > 0:
+            kl_loss = 0.5 * (torch.pow(mean, 2) + torch.pow(std, 2) - 1 - log_std * 2)
+            kl_loss = torch.clamp(kl_loss, min=self.kl_clamp)
+            kl_loss = torch.mean(torch.sum(kl_loss, dim=-1))
 
         logits = self.decoder(latent_states=latent_states).float()
-        loss_fct = nn.CrossEntropyLoss()
-        logits = logits.view(-1, self.config.vocab_size)
-        labels = labels.view(-1).to(logits.device)
-        loss = loss_fct(logits, labels) 
-        if self.training:
+        loss_fct = nn.CrossEntropyLoss(ignore_index=-100)
+        logits_flat = logits.view(-1, self.config.vocab_size)
+        labels_flat = labels.view(-1).to(logits.device)
+        if self.config.pad_token_id is not None:
+            labels_flat = labels_flat.masked_fill(labels_flat == self.config.pad_token_id, -100)
+        loss = loss_fct(logits_flat, labels_flat)
+        if self.training and self.kl_weight > 0:
             loss = loss * self.patch_size + kl_loss * self.kl_weight
 
         return CausalLMOutputWithPast(

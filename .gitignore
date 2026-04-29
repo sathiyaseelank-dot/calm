@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+.venv/
+pip-log.txt
+*.egg-info/
+dist/
+build/
+
+# Output dirs
+out_*/
+*.tar.gz
+
+# Data
+data/*.txt
+data/*.json
+data/*.jsonl
+!.gitkeep
+
+# Cache
+.hf_cache/
+*.cache
+
+# IDE
+*.swp
+*.swo
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
