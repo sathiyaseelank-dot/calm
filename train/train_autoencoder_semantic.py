@@ -49,6 +49,7 @@ def main():
     )
 
     model = Autoencoder(config)
+    model = model.cuda()
     model.train()
 
     logger.info("Loading monology/pile-uncopyrighted dataset (streaming)...")
@@ -121,6 +122,7 @@ def main():
 
         for batch_idx, (batch,) in enumerate(train_loader):
             optimizer.zero_grad()
+            batch = batch.cuda()
 
             outputs = model(input_ids=batch, labels=batch)
             loss = outputs.loss
