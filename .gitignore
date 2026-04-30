@@ -15,8 +15,11 @@ build/
 # Output dirs
 out_*
 *.tar.gz
+checkpoints/
+runs/
+wandb/
 
-# Data
+# Data (except gitkeep)
 data/*.txt
 data/*.json
 data/*.jsonl
@@ -38,6 +41,16 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Large artifacts
+*.whl
+*.safetensors
+
+# System
+*.err
+*.out
+tokenized_data/
+processed_data/
 # Training artifacts
 checkpoints/
 runs/
