@@ -38,3 +38,19 @@ Thumbs.db
 
 # Logs
 *.log
+# Training artifacts
+checkpoints/
+runs/
+wandb/
+*.safetensors
+train/*.log
+train/*.out
+train/*.err
+# Temporary data
+tokenized_data/
+processed_data/
+# System
+.vscode/
+.idea/
+*.swp
+*.swo
