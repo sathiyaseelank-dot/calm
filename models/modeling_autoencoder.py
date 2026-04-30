@@ -150,7 +150,6 @@ class Autoencoder(LlamaPreTrainedModel):
         labels: Optional[torch.LongTensor] = None,
         **kwargs
     ) -> Union[Tuple, CausalLMOutputWithPast]:
-        input_ids = input_ids.reshape(-1, self.patch_size)
         if self.training and self.ae_dropout > 0:
             mask = torch.rand_like(input_ids.float()) > self.ae_dropout
             input_ids = input_ids * mask.long()

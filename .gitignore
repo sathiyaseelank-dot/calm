@@ -13,7 +13,7 @@ dist/
 build/
 
 # Output dirs
-
+out_*
 *.tar.gz
 
 # Data
